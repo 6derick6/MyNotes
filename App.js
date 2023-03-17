@@ -1,19 +1,42 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
+import { useEffect, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, TextInput, AsyncStorage } from 'react-native';
 
 export default function App() {
 
   const [estado,setEstado] = useState('leitura');
   const [anotacao,setAnotacao] = useState('');
 
+  useEffect(()=>{
+
+    (async () => {
+      try{
+        const anotacaoLeitura = await AsyncStorage.getItem('anotacao');
+        setAnotacao(anotacaoLeitura);
+      }catch(error){}
+    })();
+
+  },[])
+
+  setData = async() => {
+    try{
+      await AsyncStorage.setItem('anotacao',anotacao);
+    }catch(error){
+
+    }
+
+    alert('Sua anotação foi salva!');
+  }
+
   function atualizarTexto(){
     setEstado('leitura');
+    setData();
   }
 
   if(estado == 'leitura'){
   return (
-    <View style={{flex:1,marginTop:30}}>
+    <View style={{flex:1}}>
+      <StatusBar hidden/>
       <View style={styles.header}><Text style={{textAlign:'center',color:'white',fontSize:18}}>App MyNotes</Text></View>
 
       {
@@ -41,10 +64,11 @@ export default function App() {
   );
   }else if(estado == 'atualizando'){
     return (
-      <View style={{flex:1,marginTop:30}}>
+      <View style={{flex:1}}>
+        <StatusBar hidden />
         <View style={styles.header}><Text style={{textAlign:'center',color:'white',fontSize:18}}>App MyNotes</Text></View>
   
-        <TextInput style={{padding:20,height:300,textAlignVertical:'top'}} onChangeText={(text)=>setAnotacao(text)} multiline={true} numberOfLines={5} value={anotacao}></TextInput>
+        <TextInput autoFocus={true} style={{padding:20,height:300,textAlignVertical:'top'}} onChangeText={(text)=>setAnotacao(text)} multiline={true} numberOfLines={5} value={anotacao}></TextInput>
 
         <TouchableOpacity onPress={()=> atualizarTexto()} style={styles.btnSalvar}><Text style={styles.btnSalvarTexto}>Salvar</Text></TouchableOpacity>  
       </View>
